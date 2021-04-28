@@ -126,20 +126,24 @@ export abstract class Router {
         break
       case TradeType.EXACT_OUTPUT:
         invariant(!useFeeOnTransfer, 'EXACT_OUT_FOT')
-        if (etherIn) {
+        if (multihop) {
+          methodName = 'multihopBatchSwapExactOut'
+          args = [swapSequences, tokenIn, tokenOut, amountIn, deadline]
+          value = etherIn ? amountIn : ZERO_HEX
+        } else if (etherIn) {
           methodName = 'swapETHForExactTokens'
           // (uint amountOut, address[] calldata path, address to, uint deadline)
-          args = [amountOut, path, to, deadline]
+          args = [tokenOut, amountOut, path, to, deadline]
           value = amountIn
         } else if (etherOut) {
           methodName = 'swapTokensForExactETH'
           // (uint amountOut, uint amountInMax, address[] calldata path, address to, uint deadline)
-          args = [amountOut, amountIn, path, to, deadline]
+          args = [tokenIn, amountOut, amountIn, path, to, deadline]
           value = ZERO_HEX
         } else {
           methodName = 'swapTokensForExactTokens'
           // (uint amountOut, uint amountInMax, address[] calldata path, address to, uint deadline)
-          args = [amountOut, amountIn, path, to, deadline]
+          args = [tokenIn, tokenOut, amountOut, amountIn, path, to, deadline]
           value = ZERO_HEX
         }
         break

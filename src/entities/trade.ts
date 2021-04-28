@@ -162,19 +162,23 @@ export class Trade {
       invariant(currencyEquals(amount.currency, route.input), 'INPUT')
       amounts[0] = wrappedAmount(amount, route.chainId)
       for (let i = 0; i < route.path.length - 1; i++) {
-        const pair = route.pairs[i]
-        const [outputAmount, nextPair] = pair.getOutputAmount(amounts[i])
-        amounts[i + 1] = outputAmount
-        nextPairs[i] = nextPair
+        try {
+          const pair = route.pairs[i]
+          const [outputAmount, nextPair] = pair.getOutputAmount(amounts[i])
+          amounts[i + 1] = outputAmount
+          nextPairs[i] = nextPair
+        } catch (e) {}
       }
     } else {
       invariant(currencyEquals(amount.currency, route.output), 'OUTPUT')
       amounts[amounts.length - 1] = wrappedAmount(amount, route.chainId)
       for (let i = route.path.length - 1; i > 0; i--) {
-        const pair = route.pairs[i - 1]
-        const [inputAmount, nextPair] = pair.getInputAmount(amounts[i])
-        amounts[i - 1] = inputAmount
-        nextPairs[i - 1] = nextPair
+        try {
+          const pair = route.pairs[i - 1]
+          const [inputAmount, nextPair] = pair.getInputAmount(amounts[i])
+          amounts[i - 1] = inputAmount
+          nextPairs[i - 1] = nextPair
+        } catch (e) {}
       }
     }
 
@@ -200,8 +204,9 @@ export class Trade {
       this.inputAmount.raw,
       this.outputAmount.raw
     )
-    this.nextMidPrice = Price.fromRoute(new Route(nextPairs, route.input))
-    this.priceImpact = computePriceImpact(route.midPrice, this.inputAmount, this.outputAmount)
+    // this.nextMidPrice = nextPairs.length ? Price.fromRoute(new Route(nextPairs, route.input)) : {} as Price
+    this.nextMidPrice = {} as Price
+    this.priceImpact = overrides?.priceImpact ?? computePriceImpact(route.midPrice, this.inputAmount, this.outputAmount)
     this.tokenIn = overrides?.tokenIn || {} as Token
     this.tokenOut = overrides?.tokenOut || {} as Token
     this.swapSequences = overrides?.swapSequences || []
