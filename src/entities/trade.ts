@@ -184,20 +184,30 @@ export class Trade {
 
     this.route = route
     this.tradeType = tradeType
-    this.inputAmount = overrides?.inputAmount ?? (
-      tradeType === TradeType.EXACT_INPUT
-        ? amount
-        : route.input === ETHER
-        ? CurrencyAmount.ether(amounts[0].raw)
-        : amounts[0]
-    )
-    this.outputAmount = overrides?.outputAmount ?? (
-      tradeType === TradeType.EXACT_OUTPUT
-        ? amount
-        : route.output === ETHER
-        ? CurrencyAmount.ether(amounts[amounts.length - 1].raw)
-        : amounts[amounts.length - 1]
-    )
+    // this.inputAmount = overrides?.inputAmount ?? (
+    //   tradeType === TradeType.EXACT_INPUT
+    //     ? amount
+    //     : route.input === ETHER
+    //     ? CurrencyAmount.ether(amounts[0].raw)
+    //     : amounts[0]
+    // )
+    this.inputAmount = tradeType === TradeType.EXACT_INPUT
+      ? amount
+      : route.input === ETHER
+          ? CurrencyAmount.ether(overrides?.inputAmount?.raw ?? amounts[0].raw)
+          : (overrides?.inputAmount ?? amounts[0])
+    // this.outputAmount = overrides?.outputAmount ?? (
+    //   tradeType === TradeType.EXACT_OUTPUT
+    //     ? amount
+    //     : route.output === ETHER
+    //     ? CurrencyAmount.ether(amounts[amounts.length - 1].raw)
+    //     : amounts[amounts.length - 1]
+    // )
+    this.outputAmount = tradeType === TradeType.EXACT_OUTPUT
+      ? amount
+      : route.output === ETHER
+          ? CurrencyAmount.ether(overrides?.outputAmount?.raw ?? amounts[amounts.length - 1].raw)
+          : (overrides?.outputAmount ?? amounts[amounts.length - 1])
     this.executionPrice = new Price(
       this.inputAmount.currency,
       this.outputAmount.currency,
